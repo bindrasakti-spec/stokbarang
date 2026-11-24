@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stok Barang</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ==================== WATERMARK OVERLAY ==================== -->
+  <div class="watermark-overlay" aria-hidden="true">
+    <div class="watermark-pattern">
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+      <span>SRI BARADA INDRA SAKTI</span>
+    </div>
+  </div>
+
+  <!-- ==================== HALAMAN LOGIN ==================== -->
+  <div id="login-screen" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-logo"></div>
+        <div>
+          <h1>Stok Barang</h1>
+          <p>hilangkan manual biar nggak pusing ges</p>
+          <span class="watermark-badge">Sri Barada Indra Sakti</span>
+        </div>
+      </div>
+
+      <div id="login-error" class="alert alert-danger hidden"></div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Masukkan username Anda" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Masukkan password Anda" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Masuk ke Sistem</button>
+      </form>
+
+      <div class="login-footer">
+        <span id="connection-badge" class="badge badge-success">Semanget Biar pikiran Ngga Anget Lur</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APLIKASI UTAMA ==================== -->
+  <div id="app-screen" class="app-layout hidden">
+    <!-- Sidebar Navigasi -->
+    <aside class="sidebar no-print">
+      <div class="sidebar-header">
+        <div class="brand-logo-sm"></div>
+        <div>
+          <h4>Stok Barang Masa Kini</h4>
+          <span class="sidebar-subtitle">Bukan masa pas sama dia</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-divider nav-stock-only">MANAJEMEN STOK BARANG</div>
+        <button class="nav-item active nav-stock-only" data-view="daily">
+          <span class="nav-icon"></span>
+          <span>Update Stok Harian</span>
+        </button>
+        <button class="nav-item nav-stock-only" data-view="monthly">
+          <span class="nav-icon"></span>
+          <span>Resume Bulanan</span>
+        </button>
+        <button class="nav-item nav-stock-only" data-view="items">
+          <span class="nav-icon"></span>
+          <span>Master Data Barang</span>
+        </button>
+
+        <div class="sidebar-divider nav-cust-only">PELANGGAN</div>
+        <button class="nav-item nav-cust-only" data-view="gmdp" id="nav-gmdp">
+          <span class="nav-icon"></span>
+          <span>GMDP</span>
+        </button>
+        <button class="nav-item nav-cust-only" data-view="genap" id="nav-genap">
+          <span class="nav-icon"></span>
+          <span>GENAP</span>
+        </button>
+
+        <div class="sidebar-divider log-access-only">MONITORING & LOG</div>
+        <button class="nav-item log-access-only" data-view="logs" id="nav-logs">
+          <span class="nav-icon"></span>
+          <span>Log Aktivitas</span>
+        </button>
+
+        <div class="sidebar-divider superadmin-only">PENGATURAN SISTEM</div>
+        <button class="nav-item superadmin-only" data-view="users" id="nav-users">
+          <span class="nav-icon"></span>
+          <span>Kelola Pengguna</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="current-user-avatar">A</div>
+          <div class="user-info">
+            <strong id="current-user-name">Administrator</strong>
+            <span id="current-user-role" class="badge badge-role">ADMIN</span>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn btn-danger-outline btn-block btn-sm">Keluar / Logout</button>
+      </div>
+    </aside>
+
+    <!-- Konten Utama -->
+    <main class="main-content">
+      <!-- Header Atas -->
+      <header class="topbar no-print">
+        <div>
+          <h1 id="page-title">Update Stok Harian</h1>
+          <p id="page-subtitle" class="text-muted">Catat barang masuk & keluar setiap hari secara akurat</p>
+        </div>
+        <div class="topbar-right">
+          <span id="storage-mode-indicator" class="badge badge-info">Mode Penyimpanan</span>
+          <span id="current-date-display" class="date-pill"></span>
+        </div>
+      </header>
+
+      <!-- Notifikasi Toast -->
+      <div id="toast-container" class="toast-container no-print"></div>
+
+      <!-- ==================== VIEW 1: UPDATE STOK HARIAN ==================== -->
+      <section id="view-daily" class="view-section">
+        <!-- Ringkasan Hari Ini (Tanpa Total Jenis Barang) -->
+        <div class="stats-grid">
+          <div class="stat-card stat-in">
+            <div class="stat-label">Barang Masuk (Tanggal Terpilih)</div>
+            <div class="stat-value text-success" id="stat-today-in">+0</div>
+            <div class="stat-meta" id="stat-today-in-tx">0 transaksi masuk</div>
+          </div>
+          <div class="stat-card stat-dismantle">
+            <div class="stat-label">Barang Masuk Dismantle</div>
+            <div class="stat-value text-dismantle" id="stat-today-dismantle">+0</div>
+            <div class="stat-meta" id="stat-today-dismantle-tx">0 penarikan dismantle</div>
+          </div>
+          <div class="stat-card stat-out">
+            <div class="stat-label">Barang Keluar (Tanggal Terpilih)</div>
+            <div class="stat-value text-danger" id="stat-today-out">-0</div>
+            <div class="stat-meta" id="stat-today-out-tx">0 transaksi keluar</div>
+          </div>
+          <div class="stat-card stat-warning">
+            <div class="stat-label">Peringatan Stok Menipis</div>
+            <div class="stat-value text-warning" id="stat-low-stock">0</div>
+            <div class="stat-meta">Barang di bawah batas minimum</div>
+          </div>
+        </div>
+
+        <!-- Total Stok Barang per Kategori -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>🏷️ Total Stok Barang per Kategori</h3>
+              <span class="text-muted text-sm">Akumulasi jumlah stok fisik saat ini berdasarkan masing-masing kategori barang</span>
+            </div>
+            <div class="filter-bar">
+              <select id="daily-category-filter" title="Filter Kategori">
+                <option value="ALL">Semua Kategori</option>
+              </select>
+              <input type="text" id="daily-category-search" placeholder="Cari kategori / barang..." />
+              <span class="badge badge-info" id="total-all-stock-badge">Total Fisik Gudang: 0 Unit</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="daily-category-stock-grid" class="category-stock-grid"></div>
+          </div>
+        </div>
+
+        <!-- Banner Peringatan Stok Menipis -->
+        <div id="low-stock-banner" class="alert alert-warning hidden">
+          <strong>⚠️ Perhatian Stok Menipis:</strong>
+          <span id="low-stock-list"></span>
+        </div>
+
+        <div class="daily-grid">
+          <!-- Form Input Harian -->
+          <div class="card stock-edit-only">
+            <div class="card-header">
+              <h3>➕ Input Mutasi Stok Harian</h3>
+              <span class="text-muted text-sm">Termasuk Barang Masuk Baru, Barang Masuk Dismantle & Barang Keluar</span>
+            </div>
+            <form id="tx-form" class="card-body">
+              <div class="form-group">
+                <label>Jenis Mutasi Stok</label>
+                <div class="type-selector type-selector-3">
+                  <label class="type-option type-in active" id="label-type-in">
+                    <input type="radio" name="tx-mode" value="IN" checked />
+                    <span>📥 Barang Masuk (+)</span>
+                  </label>
+                  <label class="type-option type-dismantle" id="label-type-dismantle">
+                    <input type="radio" name="tx-mode" value="DISMANTLE" />
+                    <span>🔧 Masuk Dismantle (+)</span>
+                  </label>
+                  <label class="type-option type-out" id="label-type-out">
+                    <input type="radio" name="tx-mode" value="OUT" />
+                    <span>📤 Barang Keluar (-)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="tx-date">Tanggal Transaksi</label>
+                  <input type="date" id="tx-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="tx-quantity">Jumlah Barang</label>
+                  <input type="number" id="tx-quantity" min="1" placeholder="Contoh: 10" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="tx-item">Pilih Barang</label>
+                <input type="text" id="tx-item-search" class="tx-item-search" placeholder="🔍 Cari barang (SKU / nama / kategori)..." autocomplete="off" />
+                <select id="tx-item" required>
+                  <option value="">-- Pilih Barang --</option>
+                </select>
+                <small id="tx-item-stock-hint" class="form-hint">Pilih barang untuk melihat sisa stok saat ini.</small>
+              </div>
+
+              <div class="form-group">
+                <label for="tx-reason">Alasan / Kategori Mutasi</label>
+                <select id="tx-reason" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="tx-notes">Catatan / Keterangan (Opsional)</label>
+                <input type="text" id="tx-notes" placeholder="Contoh: Lokasi dismantle / Nama Pelanggan / No. WO" />
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-tx">
+                Simpan Transaksi Stok
+              </button>
+            </form>
+          </div>
+
+          <!-- Tabel Riwayat Harian -->
+          <div class="card">
+            <div class="card-header card-header-flex">
+              <div>
+                <h3>📋 Riwayat Transaksi Harian</h3>
+                <span class="text-muted text-sm">Filter berdasarkan tanggal atau kategori mutasi (termasuk Dismantle)</span>
+              </div>
+              <div class="filter-bar">
+                <input type="text" id="filter-tx-search" placeholder="Cari barang / SKU / catatan..." />
+                <input type="date" id="filter-date" title="Filter Tanggal" />
+                <select id="filter-type">
+                  <option value="ALL">Semua Tipe</option>
+                  <option value="IN">Semua Barang Masuk (+)</option>
+                  <option value="DISMANTLE">🔧 Khusus Masuk Dismantle (+)</option>
+                  <option value="OUT">Barang Keluar (-)</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-show-all-dates">Semua Tanggal</button>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-export-daily-excel">📥 Export Excel</button>
+                <button
+                  type="button"
+                  class="btn btn-danger-outline btn-sm stock-edit-only"
+                  id="btn-bulk-delete-tx"
+                  disabled
+                  title="Centang transaksi di tabel lalu klik untuk hapus bersamaan & kembalikan stok"
+                >
+                  🗑️ Hapus Terpilih (<span id="selected-tx-count">0</span>)
+                </button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th class="stock-edit-only text-center" style="width: 42px">
+                      <input type="checkbox" id="select-all-tx" title="Pilih / Batal Pilih Semua Transaksi" />
+                    </th>
+                    <th>Tanggal</th>
+                    <th>Barang</th>
+                    <th>Tipe</th>
+                    <th>Jumlah</th>
+                    <th>Alasan</th>
+                    <th>Catatan & Petugas</th>
+                    <th class="stock-edit-only">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tx-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 2: RESUME OTOMATIS BULANAN ==================== -->
+      <section id="view-monthly" class="view-section hidden">
+        <!-- Header Cetak Khusus Print -->
+        <div class="print-only print-header">
+          <h2>LAPORAN RESUME BULANAN STOK BARANG — SRI BARADA INDRA SAKTI</h2>
+          <p id="print-period-label">Periode: -</p>
+          <p id="print-meta-label">Dicetak oleh: -</p>
+          <hr />
+        </div>
+
+        <div class="card mb-20 no-print">
+          <div class="card-body monthly-toolbar">
+            <div class="monthly-picker-group">
+              <label for="report-month-select"><strong>Pilih Bulan:</strong></label>
+              <select id="report-month-select" aria-label="Pilih Bulan">
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <label for="report-year-select"><strong>Tahun:</strong></label>
+              <select id="report-year-select" aria-label="Pilih Tahun"></select>
+              <input type="month" id="report-month" title="Atau pilih langsung bulan & tahun" />
+              <span class="badge badge-success">Otomatis Terhitung</span>
+            </div>
+            <div class="monthly-actions">
+              <button type="button" class="btn btn-outline" id="btn-export-csv">
+                📥 Export CSV / Excel
+              </button>
+              <button type="button" class="btn btn-primary" id="btn-print-report">
+                🖨️ Cetak Laporan / PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Bulanan -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Stok Awal Bulan</div>
+            <div class="stat-value" id="rep-opening-stock">0</div>
+            <div class="stat-meta">Akumulasi sebelum tanggal 1</div>
+          </div>
+          <div class="stat-card stat-in">
+            <div class="stat-label">Total Barang Masuk (Bulan Ini)</div>
+            <div class="stat-value text-success" id="rep-total-in">+0</div>
+            <div class="stat-meta" id="rep-in-breakdown">Restok: 0 | Dismantle: 0</div>
+          </div>
+          <div class="stat-card stat-dismantle">
+            <div class="stat-label">Total Masuk Dismantle</div>
+            <div class="stat-value text-dismantle" id="rep-total-dismantle">+0</div>
+            <div class="stat-meta">Penarikan perangkat dismantle</div>
+          </div>
+          <div class="stat-card stat-out">
+            <div class="stat-label">Total Barang Keluar (Bulan Ini)</div>
+            <div class="stat-value text-danger" id="rep-total-out">-0</div>
+            <div class="stat-meta" id="rep-out-breakdown">Pemasangan: 0 | Dijual: 0 | Rusak: 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Stok Akhir Bulan</div>
+            <div class="stat-value" id="rep-closing-stock">0</div>
+            <div class="stat-meta" id="rep-stock-value">Total sisa stok di akhir bulan</div>
+          </div>
+        </div>
+
+        <!-- Total Stok Barang per Kategori pada Bulan Terpilih -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>🏷️ Total Stok Barang per Kategori (Resume Bulanan)</h3>
+              <span class="text-muted text-sm">Akumulasi jumlah stok awal, masuk (+), keluar (-), dan stok akhir per kategori barang pada bulan terpilih</span>
+            </div>
+            <div class="filter-bar">
+              <select id="monthly-category-filter" title="Filter Kategori">
+                <option value="ALL">Semua Kategori</option>
+              </select>
+              <input type="text" id="monthly-category-search" placeholder="Cari kategori / barang..." />
+              <span class="badge badge-info" id="monthly-total-stock-badge">Total Stok Akhir: 0 Unit</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="monthly-category-stock-grid" class="category-stock-grid"></div>
+          </div>
+        </div>
+
+        <!-- Breakdown Alasan & Rekap Harian dalam Bulan -->
+        <div class="monthly-subgrid">
+          <div class="card">
+            <div class="card-header">
+              <h3>📌 Rekap Berdasarkan Alasan Mutasi</h3>
+              <span class="text-muted text-sm">Pemasangan, Dijual, Rusak, Dismantle, dan Restok</span>
+            </div>
+            <div class="card-body" id="reason-breakdown-container"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📅 Ringkasan Pergerakan per Tanggal</h3>
+              <span class="text-muted text-sm">Tanggal aktif yang memiliki mutasi stok</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Jml Transaksi</th>
+                    <th>Restok (+)</th>
+                    <th>Dismantle (+)</th>
+                    <th>Total Keluar (-)</th>
+                    <th>Selisih Harian</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-summary-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabel Resume Bulanan Per Barang -->
+        <div class="card mt-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>📊 Tabel Resume Bulanan Per Barang (Otomatis)</h3>
+              <span class="text-muted text-sm">Rumus: Stok Akhir = Stok Awal Bulan + (Restok + Dismantle) - (Pemasangan + Dijual + Rusak)</span>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="search-monthly-item" placeholder="Cari SKU / nama / kategori..." />
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="monthly-report-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Nama Barang</th>
+                  <th>Kategori</th>
+                  <th class="text-right">Stok Awal</th>
+                  <th class="text-right text-success">Restok (+)</th>
+                  <th class="text-right text-dismantle">Dismantle (+)</th>
+                  <th class="text-right text-success"><strong>Total Masuk (+)</strong></th>
+                  <th class="text-right">Pemasangan</th>
+                  <th class="text-right">Dijual</th>
+                  <th class="text-right">Rusak</th>
+                  <th class="text-right text-danger">Total Keluar (-)</th>
+                  <th class="text-right">Perubahan</th>
+                  <th class="text-right"><strong>Stok Akhir</strong></th>
+                </tr>
+              </thead>
+              <tbody id="monthly-items-tbody"></tbody>
+              <tfoot id="monthly-items-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 3: MASTER DATA BARANG ==================== -->
+      <section id="view-items" class="view-section hidden">
+        <!-- Ringkasan Total Stok per Kategori di Master Barang -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>🏷️ Ringkasan Total Stok per Kategori</h3>
+              <span class="text-muted text-sm">Klik pada kartu kategori untuk memfilter daftar barang di bawah</span>
+            </div>
+            <div class="filter-bar">
+              <select id="items-category-filter" title="Filter Kategori">
+                <option value="ALL">Semua Kategori</option>
+              </select>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-reset-category-filter">
+                Tampilkan Semua Kategori
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="items-category-stock-grid" class="category-stock-grid"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>🏷️ Daftar Master Barang</h3>
+              <span class="text-muted text-sm">Kelola katalog barang, kategori, satuan, dan batas minimum stok</span>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="search-item" placeholder="Cari SKU / nama / kategori..." />
+              <button
+                type="button"
+                class="btn btn-danger-outline stock-edit-only"
+                id="btn-bulk-delete-items"
+                disabled
+                title="Centang barang di tabel lalu klik untuk hapus bersamaan"
+              >
+                🗑️ Hapus Terpilih (<span id="selected-items-count">0</span>)
+              </button>
+              <button type="button" class="btn btn-primary stock-edit-only" id="btn-open-item-modal">
+                + Tambah Barang Baru
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="stock-edit-only text-center" style="width: 42px">
+                    <input type="checkbox" id="select-all-items" title="Pilih / Batal Pilih Semua" />
+                  </th>
+                  <th>Kode SKU</th>
+                  <th>Nama Barang</th>
+                  <th>Kategori</th>
+                  <th>Satuan</th>
+                  <th class="text-right">Stok Min.</th>
+                  <th class="text-right">Stok Saat Ini</th>
+                  <th>Status Stok</th>
+                  <th class="stock-edit-only">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="items-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 4: MANAJEMEN PENGGUNA (SUPERADMIN) ==================== -->
+      <section id="view-users" class="view-section hidden">
+        <div class="daily-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>👤 Tambah Pengguna Baru</h3>
+              <span class="text-muted text-sm">Atur peran hak akses: Superadmin, Admin, Teknisi, Spesial, atau Viewer</span>
+            </div>
+            <form id="user-form" class="card-body">
+              <div class="form-group">
+                <label for="user-fullname">Nama Lengkap</label>
+                <input type="text" id="user-fullname" placeholder="Contoh: Budi Santoso" required />
+              </div>
+              <div class="form-group">
+                <label for="user-username">Username Login</label>
+                <input type="text" id="user-username" placeholder="Contoh: budi_teknisi" required />
+              </div>
+              <div class="form-group">
+                <label for="user-password">Password</label>
+                <input type="password" id="user-password" placeholder="Minimal 4 karakter" required />
+              </div>
+              <div class="form-group">
+                <label for="user-role">Peran / Hak Akses (Role)</label>
+                <select id="user-role" required>
+                  <option value="superadmin">👑 Superadmin — Akses Full (Stok Barang, Pelanggan GMDP/GENAP & Kelola Pengguna)</option>
+                  <option value="admin">🏢 Admin — Melihat & Edit Pelanggan GMDP dan GENAP saja</option>
+                  <option value="teknisi">🔧 Teknisi — Melihat & Edit Stok Barang saja</option>
+                  <option value="viewer">👁️ Viewer — Hanya Melihat Stok Barang & Export Saja</option>
+                  <option value="spesial">⭐ Spesial — Melihat & Edit Semua, Tidak Bisa Tambah Pengguna Baru</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Tambah Akun Pengguna</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>👥 Daftar Akun Pengguna Aktif</h3>
+              <span class="text-muted text-sm">Pengguna yang dapat login ke sistem</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Nama Lengkap</th>
+                    <th>Peran (Role)</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="users-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manajemen Database Produksi (Backup, Restore & Kirim ke Beberapa Email) -->
+        <div class="card mt-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>💾 Manajemen Database Produksi (Backup, Restore & Pemeliharaan)</h3>
+              <span class="text-muted text-sm">Simpan cadangan seluruh data sistem (Stok Barang, Folder GMDP, dan Folder GENAP) ke komputer atau kirim ke beberapa email</span>
+            </div>
+            <span class="badge badge-success">Status Sistem: ACC / Produksi Resmi</span>
+          </div>
+          <div class="card-body">
+            <div class="monthly-actions" style="flex-wrap: wrap; margin-bottom: 20px">
+              <button type="button" class="btn btn-primary" id="btn-backup-db">
+                💾 Download Backup Database (.json)
+              </button>
+              <label class="btn btn-outline" style="cursor: pointer; margin: 0">
+                📂 Restore Database dari File (.json)
+                <input type="file" id="input-restore-db" accept=".json" style="display: none" />
+              </label>
+              <button type="button" class="btn btn-outline" id="btn-clear-transactions">
+                🗑️ Kosongkan Riwayat Transaksi (Mulai Baru)
+              </button>
+            </div>
+
+            <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 18px 0" />
+
+            <!-- Bagian Kirim Backup ke Beberapa Email -->
+            <div class="daily-grid">
+              <!-- Form Tambah Email Penerima Backup -->
+              <div class="card" style="box-shadow: none">
+                <div class="card-header">
+                  <h3>📧 Tambah Email Penerima Backup</h3>
+                  <span class="text-muted text-sm">Daftarkan beberapa alamat email tujuan pengiriman backup database</span>
+                </div>
+                <form id="backup-email-form" class="card-body">
+                  <div class="form-group">
+                    <label for="backup-email-label">Nama / Label Penerima</label>
+                    <input
+                      type="text"
+                      id="backup-email-label"
+                      placeholder="Contoh: Email Utama Sri Barada / Owner / Admin"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="backup-email-address">Alamat Email (Bisa 1 atau beberapa dipisah koma)</label>
+                    <input
+                      type="text"
+                      id="backup-email-address"
+                      placeholder="Contoh: email1@gmail.com, email2@perusahaan.com"
+                      required
+                    />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    + Tambah ke Daftar Email Backup
+                  </button>
+                </form>
+              </div>
+
+              <!-- Daftar Email Penerima & Tombol Kirim Sekaligus -->
+              <div class="card" style="box-shadow: none">
+                <div class="card-header card-header-flex">
+                  <div>
+                    <h3>📨 Daftar Email Penerima Backup (<span id="backup-email-count">0</span> Email)</h3>
+                    <span class="text-muted text-sm">Centang email yang ingin dikirimi salinan backup database</span>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-toggle-smtp-config">
+                    ⚙️ Pengaturan SMTP Server
+                  </button>
+                </div>
+
+                <!-- Panel Konfigurasi SMTP (Opsional untuk Server Mode) -->
+                <div id="smtp-config-panel" class="card-body hidden" style="background: #f8fafc; border-bottom: 1px solid var(--border-color)">
+                  <h4 style="margin-bottom: 8px; font-size: 13px">⚙️ Konfigurasi Pengirim Email Otomatis (SMTP Gmail / Server)</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="smtp-sender-email">Email Pengirim (Gmail / SMTP)</label>
+                      <input type="text" id="smtp-sender-email" placeholder="Contoh: sistem.sribarada@gmail.com" />
+                    </div>
+                    <div class="form-group">
+                      <label for="smtp-app-password">App Password Gmail / Password SMTP</label>
+                      <input type="password" id="smtp-app-password" placeholder="16 digit App Password Gmail" />
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-save-smtp-config">
+                    💾 Simpan Konfigurasi SMTP
+                  </button>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px">
+                          <input type="checkbox" id="check-all-backup-emails" checked title="Pilih Semua Email" />
+                        </th>
+                        <th>Nama / Label Penerima</th>
+                        <th>Alamat Email</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="backup-emails-tbody"></tbody>
+                  </table>
+                </div>
+
+                <div class="card-body" style="border-top: 1px solid var(--border-color); background: #fafbfc">
+                  <div class="monthly-actions" style="flex-wrap: wrap">
+                    <button type="button" class="btn btn-primary" id="btn-send-backup-gmail">
+                      📨 Kirim Backup via Gmail Web (Ke Semua Email Terpilih)
+                    </button>
+                    <button type="button" class="btn btn-outline" id="btn-send-backup-mailto">
+                      📧 Kirim via Aplikasi Email Default
+                    </button>
+                    <button type="button" class="btn btn-outline" id="btn-send-backup-smtp">
+                      🚀 Kirim Otomatis via Server SMTP
+                    </button>
+                  </div>
+                  <small id="last-backup-sent-info" class="form-hint" style="margin-top: 8px">
+                    Pilih satu atau beberapa email di atas, lalu klik tombol kirim. File backup (.json) otomatis disiapkan beserta ringkasan data.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 5: FOLDER TERPISAH PELANGGAN (GMDP / GENAP) ==================== -->
+      <!-- ==================== VIEW 5: LOG AKTIVITAS (SUPERADMIN & SPESIAL) ==================== -->
+      <section id="view-logs" class="view-section hidden">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Aktivitas Tercatat</div>
+            <div class="stat-value" id="log-stat-total">0</div>
+            <div class="stat-meta">Sesuai filter yang ditampilkan</div>
+          </div>
+          <div class="stat-card stat-in">
+            <div class="stat-label">Aktivitas Login</div>
+            <div class="stat-value text-success" id="log-stat-login">0</div>
+            <div class="stat-meta">Riwayat user masuk sistem</div>
+          </div>
+          <div class="stat-card stat-dismantle">
+            <div class="stat-label">Aktivitas Edit / Ubah Data</div>
+            <div class="stat-value text-dismantle" id="log-stat-edit">0</div>
+            <div class="stat-meta">Tambah, ubah, dan hapus data</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Aktivitas Export</div>
+            <div class="stat-value" id="log-stat-export">0</div>
+            <div class="stat-meta">Unduh CSV / Excel laporan</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>📜 Log Aktivitas Pengguna (Login, Edit & Export)</h3>
+              <span class="text-muted text-sm">Khusus Superadmin dan User Spesial untuk memantau aktivitas seluruh akun</span>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="log-search" placeholder="Cari user / target / keterangan..." />
+              <select id="log-filter-action" title="Filter Jenis Aktivitas">
+                <option value="ALL">Semua Aktivitas</option>
+                <option value="LOGIN">🔑 Login</option>
+                <option value="EDIT">✏️ Edit / Ubah Data</option>
+                <option value="EXPORT">📥 Export Data</option>
+              </select>
+              <input type="date" id="log-filter-date" title="Filter Tanggal" />
+              <button type="button" class="btn btn-outline btn-sm" id="btn-refresh-logs">🔄 Muat Ulang</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-export-logs-csv">📥 Export Log</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pengguna</th>
+                  <th>Role</th>
+                  <th>Aktivitas</th>
+                  <th>Modul / Target</th>
+                  <th>Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-customers" class="view-section hidden">
+        <!-- Header Cetak Khusus Print -->
+        <div class="print-only print-header">
+          <h2 id="print-cust-header-title">LAPORAN FOLDER MONITORING PELANGGAN — SRI BARADA INDRA SAKTI</h2>
+          <p id="print-cust-period-label">Periode: -</p>
+          <hr />
+        </div>
+
+        <!-- Banner Identitas Folder Terpisah -->
+        <div class="folder-banner mb-20" id="folder-identity-banner">
+          <div class="folder-banner-left">
+            <div class="folder-icon-box" id="folder-icon-box"></div>
+            <div>
+              <div class="folder-badge-row">
+                <span class="badge badge-gmdp" id="folder-code-badge">FOLDER TERPISAH • DATABASE MANDIRI</span>
+                <code id="folder-path-label">data/gmdp/customers_gmdp.db</code>
+              </div>
+              <h2 id="folder-title-heading">Pelanggan GMDP</h2>
+              <p class="text-muted text-sm" id="folder-desc-text">
+                Data pelanggan GMDP.
+              </p>
+            </div>
+          </div>
+          <div class="folder-switch-box no-print">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-switch-folder-gmdp">
+              Buka GMDP
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-switch-folder-genap">
+              Buka GeNAP
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar Periode, Tambah/Edit Bulan & Tahun Manual -->
+        <div class="card mb-20 no-print">
+          <div class="card-body monthly-toolbar">
+            <div class="monthly-picker-group">
+              <label for="cust-year-select"><strong>Tahun:</strong></label>
+              <select id="cust-year-select" style="width: 110px; font-weight: 700"></select>
+              <label for="cust-month"><strong>Bulan Fokus:</strong></label>
+              <input type="month" id="cust-month" />
+            </div>
+            <div class="monthly-actions" style="flex-wrap: wrap">
+              <button type="button" class="btn btn-primary" id="btn-open-month-modal">
+                ✏️ Tambah / Edit Bulan Manual
+              </button>
+              <button type="button" class="btn btn-primary" id="btn-open-year-modal">
+                ➕ Tambah / Edit Tahun Manual
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-set-base-customers">
+                ⚙️ Pelanggan Awal (<span id="base-folder-label">80</span>)
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-export-cust-csv">
+                📥 CSV Bulanan
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-export-cust-yearly-csv">
+                📥 CSV Tahunan
+              </button>
+              <button type="button" class="btn btn-outline" id="btn-print-cust">
+                🖨️ Cetak
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kartu KPI Pelanggan Folder Aktif -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label" id="cust-kpi-title-total">Jumlah Seluruh Pelanggan GMDP</div>
+            <div class="stat-value" id="cust-total-active">0</div>
+            <div class="stat-meta" id="cust-total-active-meta">Total akumulasi pelanggan di folder ini</div>
+          </div>
+          <div class="stat-card stat-in">
+            <div class="stat-label">Pelanggan Masuk (Bulan Ini)</div>
+            <div class="stat-value text-success" id="cust-month-in">+0</div>
+            <div class="stat-meta" id="cust-today-in-meta">Hari ini: +0 pelanggan masuk</div>
+          </div>
+          <div class="stat-card stat-out">
+            <div class="stat-label">Pelanggan Keluar (Bulan Ini)</div>
+            <div class="stat-value text-danger" id="cust-month-out">-0</div>
+            <div class="stat-meta" id="cust-today-out-meta">Hari ini: -0 pelanggan keluar</div>
+          </div>
+          <div class="stat-card stat-dismantle">
+            <div class="stat-label">Trafik Naik / Turun (Bulan Ini)</div>
+            <div class="stat-value" id="cust-month-net">0</div>
+            <div class="stat-meta" id="cust-month-trend-meta">Status pertumbuhan bulan berjalan</div>
+          </div>
+        </div>
+
+        <!-- Grafik Visual Trafik Naik Turun Setiap Bulan -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>
+                📈 Grafik Trafik Naik Turun Pelanggan Bulanan —
+                <span id="cust-chart-scope">FOLDER GMDP</span> (Tahun <span id="cust-chart-year">2026</span>)
+              </h3>
+              <span class="text-muted text-sm">Klik pada kartu bulan untuk memilih bulan, atau klik tombol Edit Bulan Manual untuk mengubah angka</span>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><i class="dot dot-in"></i> Pelanggan Masuk (+)</span>
+              <span class="legend-item"><i class="dot dot-out"></i> Pelanggan Keluar (-)</span>
+              <span class="legend-item"><i class="dot dot-total"></i> Total Pelanggan Akhir</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="customer-traffic-chart" class="traffic-chart-grid"></div>
+          </div>
+        </div>
+
+        <!-- Grafik Trafik Penambahan Harian Pelanggan -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>
+                📅 Grafik Trafik Penambahan Harian Pelanggan —
+                <span id="cust-daily-chart-scope">FOLDER GMDP</span> (<span id="cust-daily-chart-month">-</span>)
+              </h3>
+              <span class="text-muted text-sm">Rekap penambahan & pengurangan pelanggan per tanggal pada bulan terpilih (klik kartu tanggal untuk memfilter riwayat harian)</span>
+            </div>
+            <span class="badge badge-info" id="cust-daily-traffic-badge">0 Hari Aktif</span>
+          </div>
+          <div class="card-body">
+            <div id="customer-daily-traffic-chart" class="traffic-chart-grid"></div>
+          </div>
+        </div>
+
+        <!-- Tabel Resume Total & Trafik Naik Turun Setiap Bulan (Dengan Tombol Edit & Hapus Manual) -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>
+                📊 Tabel Resume Bulanan & Trafik Naik Turun —
+                <span id="cust-table-scope">FOLDER GMDP</span> (Tahun <span id="cust-table-year">2026</span>)
+              </h3>
+              <span class="text-muted text-sm">Anda dapat mengedit maupun menghapus bulan yang sudah lewat secara manual pada setiap baris</span>
+            </div>
+            <div class="filter-bar no-print">
+              <button
+                type="button"
+                class="btn btn-outline btn-sm hidden"
+                id="btn-restore-deleted-months"
+                onclick="handleRestoreDeletedMonths()"
+              >
+                🔄 Pulihkan Bulan Terhapus
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="openManualMonthModal()">
+                ✏️ Input / Edit Bulan Manual
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Bulan</th>
+                  <th>Sumber Data</th>
+                  <th class="text-right">Pelanggan Awal Bulan</th>
+                  <th class="text-right text-success">Pelanggan Masuk (+)</th>
+                  <th class="text-right text-danger">Pelanggan Keluar (-)</th>
+                  <th class="text-right">Selisih Bersih</th>
+                  <th class="text-center">Trafik Bulanan (Naik / Turun)</th>
+                  <th class="text-right"><strong>Total Seluruh Pelanggan</strong></th>
+                  <th class="no-print">Edit / Hapus Bulan</th>
+                </tr>
+              </thead>
+              <tbody id="cust-monthly-tbody"></tbody>
+              <tfoot id="cust-monthly-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Grafik Visual Trafik Tahunan (Perbandingan Antar Tahun) -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>
+                🏆 Grafik Trafik Naik Turun Pelanggan Setiap Tahunnya —
+                <span id="cust-yearly-chart-scope">FOLDER GMDP</span>
+              </h3>
+              <span class="text-muted text-sm">Perbandingan pertumbuhan pelanggan antar tahun (klik kartu tahun untuk berpindah tahun)</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm no-print" onclick="openManualYearModal()">
+              ➕ Tambah / Edit Tahun Manual
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="customer-yearly-chart" class="yearly-chart-grid"></div>
+          </div>
+        </div>
+
+        <!-- Tabel Resume Setiap Tahunnya (Rekap Tahunan + Edit Manual) -->
+        <div class="card mb-20">
+          <div class="card-header card-header-flex">
+            <div>
+              <h3>
+                📅 Tabel Resume Pelanggan Setiap Tahunnya & Trafik Tahunan —
+                <span id="cust-yearly-table-scope">FOLDER GMDP</span>
+              </h3>
+              <span class="text-muted text-sm">Tahun dapat ditambah, diedit secara manual, atau dihitung otomatis dari akumulasi bulanan</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Tahun</th>
+                  <th>Mode Data</th>
+                  <th class="text-right">Pelanggan Awal Tahun</th>
+                  <th class="text-right text-success">Masuk Setahun (+)</th>
+                  <th class="text-right text-danger">Keluar Setahun (-)</th>
+                  <th class="text-right">Pertumbuhan Bersih</th>
+                  <th class="text-center">Trafik Tahunan (Naik / Turun)</th>
+                  <th class="text-right"><strong>Total Seluruh Pelanggan Akhir Tahun</strong></th>
+                  <th class="no-print">Edit / Hapus Tahun</th>
+                </tr>
+              </thead>
+              <tbody id="cust-yearly-tbody"></tbody>
+              <tfoot id="cust-yearly-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Form Input Harian Pelanggan & Riwayat Harian (Di dalam Folder Aktif) -->
+        <div class="daily-grid no-print">
+          <div class="card">
+            <div class="card-header">
+              <h3>➕ Update Harian Pelanggan (<span id="cust-form-folder-label">GMDP</span>)</h3>
+              <span class="text-muted text-sm">Catat penambahan atau pengurangan pelanggan harian di folder ini</span>
+            </div>
+            <form id="cust-form" class="card-body">
+              <div class="form-group">
+                <label>Status Perubahan Pelanggan</label>
+                <div class="type-selector">
+                  <label class="type-option type-in active" id="label-cust-in">
+                    <input type="radio" name="cust-type" value="IN" checked />
+                    <span>🟢 Pelanggan Masuk (+)</span>
+                  </label>
+                  <label class="type-option type-out" id="label-cust-out">
+                    <input type="radio" name="cust-type" value="OUT" />
+                    <span>🔴 Pelanggan Keluar (-)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cust-date">Tanggal Update</label>
+                  <input type="date" id="cust-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="cust-count">Jumlah Pelanggan</label>
+                  <input type="number" id="cust-count" min="1" value="1" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cust-category">Kategori / Alasan</label>
+                <select id="cust-category" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="cust-info">Nama Pelanggan / Area / Keterangan</label>
+                <input type="text" id="cust-info" placeholder="Contoh: Bpk. Andi (Paket 30Mbps) / Area Sektor Barat" />
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                Simpan Update Harian ke Folder <span id="btn-submit-folder-name">GMDP</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Riwayat Harian Pelanggan -->
+          <div class="card">
+            <div class="card-header card-header-flex">
+              <div>
+                <h3>📋 Riwayat Update Harian (<span id="cust-logs-folder-label">GMDP</span>)</h3>
+                <span class="text-muted text-sm">Daftar log harian pelanggan masuk & keluar pada bulan terpilih</span>
+              </div>
+              <div class="filter-bar">
+                <input type="date" id="cust-filter-date" title="Filter Tanggal" />
+                <select id="cust-filter-type">
+                  <option value="ALL">Semua Status</option>
+                  <option value="IN">Pelanggan Masuk (+)</option>
+                  <option value="OUT">Pelanggan Keluar (-)</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-cust-all-dates">Semua Tanggal</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th>Jumlah</th>
+                    <th>Kategori / Alasan</th>
+                    <th>Nama / Area / Keterangan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="cust-logs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Watermark -->
+      <footer class="app-footer">
+        <span>© 2026 <strong>SRI BARADA INDRA SAKTI</strong> — Sistem Manajemen Stok Barang Harian & Resume Bulanan</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ==================== MODAL TAMBAH / EDIT BARANG ==================== -->
+  <div id="item-modal" class="modal-backdrop hidden no-print">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="item-modal-title">Tambah Barang Baru</h3>
+        <button type="button" class="btn-close" id="btn-close-item-modal">&times;</button>
+      </div>
+      <form id="item-form" class="modal-body">
+        <input type="hidden" id="item-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="item-sku">Kode SKU Barang</label>
+            <input type="text" id="item-sku" placeholder="Contoh: H3-S2/F670L" required />
+          </div>
+          <div class="form-group">
+            <label for="item-category">Kategori</label>
+            <input type="text" id="item-category" placeholder="Contoh: MODEM/SFP" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="item-name">Nama Barang</label>
+          <input type="text" id="item-name" placeholder="Masukkan nama lengkap barang" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="item-unit">Satuan</label>
+            <select id="item-unit">
+              <option value="Pcs">Pcs</option>
+              <option value="Box">Box</option>
+              <option value="Rim">Rim</option>
+              <option value="Pack">Pack</option>
+              <option value="Roll">Roll</option>
+              <option value="Botol">Botol</option>
+              <option value="Unit">Unit</option>
+              <option value="Kg">Kg</option>
+              <option value="Liter">Liter</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="item-min-stock">Batas Stok Minimum (Alert)</label>
+            <input type="number" id="item-min-stock" min="0" value="5" required />
+          </div>
+        </div>
+        <div class="form-group" id="initial-stock-group">
+          <label for="item-initial-stock">Stok Awal Saat Didaftarkan</label>
+          <input type="number" id="item-initial-stock" min="0" value="0" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-item">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Data Barang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL TAMBAH / EDIT BULAN SECARA MANUAL ==================== -->
+  <div id="manual-month-modal" class="modal-backdrop hidden no-print">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="manual-month-modal-title">✏️ Tambah / Edit Data Bulan Manual</h3>
+        <button type="button" class="btn-close" id="btn-close-month-modal">&times;</button>
+      </div>
+      <form id="manual-month-form" class="modal-body">
+        <div class="alert alert-warning" style="margin-bottom: 14px">
+          Folder Aktif: <strong id="modal-month-folder-name">GMDP</strong> — Anda dapat menambah atau mengedit angka pelanggan pada bulan & tahun mana pun secara manual.
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mm-year">Tahun (Bisa diketik manual)</label>
+            <input type="number" id="mm-year" min="2000" max="2100" placeholder="Contoh: 2026" required />
+          </div>
+          <div class="form-group">
+            <label for="mm-month">Pilih Bulan</label>
+            <select id="mm-month" required>
+              <option value="01">01 - Januari</option>
+              <option value="02">02 - Februari</option>
+              <option value="03">03 - Maret</option>
+              <option value="04">04 - April</option>
+              <option value="05">05 - Mei</option>
+              <option value="06">06 - Juni</option>
+              <option value="07">07 - Juli</option>
+              <option value="08">08 - Agustus</option>
+              <option value="09">09 - September</option>
+              <option value="10">10 - Oktober</option>
+              <option value="11">11 - November</option>
+              <option value="12">12 - Desember</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mm-opening">Pelanggan Awal Bulan (Opsional)</label>
+          <input
+            type="number"
+            id="mm-opening"
+            min="0"
+            placeholder="Kosongkan jika ingin otomatis lanjut dari akhir bulan sebelumnya"
+          />
+          <small class="form-hint">Jika diisi angka, maka awal bulan ini akan dikunci sesuai angka yang Anda ketik.</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mm-in">Total Pelanggan Masuk (+)</label>
+            <input type="number" id="mm-in" min="0" value="0" required />
+          </div>
+          <div class="form-group">
+            <label for="mm-out">Total Pelanggan Keluar (-)</label>
+            <input type="number" id="mm-out" min="0" value="0" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mm-notes">Catatan / Keterangan Bulan (Opsional)</label>
+          <input type="text" id="mm-notes" placeholder="Contoh: Rekap manual bulan berjalan / Penyesuaian data" />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-month-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Data Bulan Manual</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL TAMBAH / EDIT TAHUN SECARA MANUAL ==================== -->
+  <div id="manual-year-modal" class="modal-backdrop hidden no-print">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="manual-year-modal-title">➕ Tambah / Edit Data Tahun Manual</h3>
+        <button type="button" class="btn-close" id="btn-close-year-modal">&times;</button>
+      </div>
+      <form id="manual-year-form" class="modal-body">
+        <div class="alert alert-warning" style="margin-bottom: 14px">
+          Folder Aktif: <strong id="modal-year-folder-name">GMDP</strong> — Tambahkan tahun baru atau ubah rekap tahunan secara manual.
+        </div>
+
+        <div class="form-group">
+          <label for="my-year">Tahun (4 Digit)</label>
+          <input type="number" id="my-year" min="2000" max="2100" placeholder="Contoh: 2027" required />
+        </div>
+
+        <div class="form-group">
+          <label for="my-opening">Pelanggan Awal Tahun (Opsional)</label>
+          <input
+            type="number"
+            id="my-opening"
+            min="0"
+            placeholder="Kosongkan jika otomatis lanjut dari akhir tahun sebelumnya"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="my-in">Total Masuk Setahun (+) (Opsional)</label>
+            <input type="number" id="my-in" min="0" placeholder="Kosongkan = otomatis dari 12 bulan" />
+          </div>
+          <div class="form-group">
+            <label for="my-out">Total Keluar Setahun (-) (Opsional)</label>
+            <input type="number" id="my-out" min="0" placeholder="Kosongkan = otomatis dari 12 bulan" />
+          </div>
+        </div>
+        <small class="form-hint" style="margin-bottom: 12px">
+          Tips: Jika Anda hanya ingin menambahkan tahun baru agar bisa diisi per bulan, cukup isi kolom <strong>Tahun</strong> lalu klik Simpan. Jika ingin langsung mengisi total setahun secara manual, isi juga kolom Masuk & Keluar Setahun.
+        </small>
+
+        <div class="form-group">
+          <label for="my-notes">Catatan Tahun (Opsional)</label>
+          <input type="text" id="my-notes" placeholder="Contoh: Target ekspansi tahunan / Rekap historis" />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-year-modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Data Tahun</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
