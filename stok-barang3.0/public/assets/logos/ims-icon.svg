@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Inventory Management System Icon">
+  <defs>
+    <linearGradient id="imsBgGrad" x1="8" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#142B4A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="imsCubeRight" x1="32" y1="26" x2="50" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded Squircle Base -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#imsBgGrad)"/>
+  <!-- Warehouse Architectural Frame -->
+  <path d="M14 25L32 14L50 25" stroke="#93C5FD" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Geometric Isometric Cube -->
+  <path d="M32 20L46 28V43L32 51L18 43V28L32 20Z" fill="#1E3A8A" stroke="#60A5FA" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M32 20L46 28L32 36L18 28L32 20Z" fill="#3B82F6"/>
+  <path d="M32 36L46 28V43L32 51V36Z" fill="url(#imsCubeRight)"/>
+  <path d="M18 28L32 36V51L18 43V28Z" fill="#142B4A"/>
+  <!-- Tech Node & Verified Movement Check -->
+  <circle cx="32" cy="14" r="2.6" fill="#10B981"/>
+  <path d="M25.5 36.5L30.5 41.5L41 30.5" stroke="#10B981" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
